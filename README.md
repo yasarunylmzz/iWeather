@@ -1,1 +1,1 @@
-![resim1](https://github.com/yasarunylmzz/iWeather/assets/116540999/28e33aaa-4dc1-4ffc-a1d8-78046e1be5dc)![resim3](https://github.com/yasarunylmzz/iWeather/assets/116540999/2d82900e-201e-4650-b3a3-6f4e0254eb8a)![resim2](https://github.com/yasarunylmzz/iWeather/assets/116540999/41631490-319c-488e-a742-72bc6f22504d)
+<img width="911" alt="image" src="https://github.com/yasarunylmzz/iWeather/assets/116540999/f03987c6-0ba8-42ec-a446-4380d547cbd6">
