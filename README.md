@@ -9,5 +9,4 @@ https://github.com/yasarunylmzz/iWeather/assets/116540999/aa4ab71f-4373-4e71-ac2
 
 ## DÜZENLENMESİ GEREKEN KISIMLAR VAR
 
--- İkinci sekmedeki saat bilgisine göre güncellenmesi gereken ilk komponentin background imageı
--- Günlere göre gelen hava durumu bilgisini düzeltmek lazım
+## En alttaki günlük hava durumu bilgileri ve {uv index, probabilty of rain kısımları doğru çalışmıyor} \*\*\*

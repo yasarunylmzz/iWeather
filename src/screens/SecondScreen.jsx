@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   weatherSectionImage: {
     width: "200%",
     height: "55%",
-    objectFit: "contain",
+    objectFit: "scale-down",
   },
   weatherSectionText1: {
     color: "rgba(191, 191, 212, 1)",

@@ -1,14 +1,14 @@
-import clear from "../../assets/weatherIcons/clear.png";
-import cloudy from "../../assets/weatherIcons/cloudy.png";
-import fewClouds from "../../assets/weatherIcons/fewClouds.png";
-import rain from "../../assets/weatherIcons/rain.png";
-import storm from "../../assets/weatherIcons/storm.png";
+import clear from "../../assets/clear.png";
+import cloudy from "../../assets/cloudy.png";
+import fewClouds from "../../assets/fewClouds.png";
+import rain from "../../assets/rain.png";
+import storm from "../../assets/storm.png";
 
 
 export const weathers = [
   "01d" = clear,
   "04n" = cloudy,
-  "09d" = rain,
+  "Rain" = rain,
   "02d" = fewClouds,
   "11d" = storm,
   ];
