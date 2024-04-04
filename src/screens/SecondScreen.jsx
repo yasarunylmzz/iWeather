@@ -12,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { getBackgroundImage } from "../constants/Clocks";
 import { DateTime } from "luxon";
+import fetchLocalTime from "../api/fetchLocalTime";
 
 API_KEY = "9f7b96750665ffb639e69a2a081678fc";
 
@@ -19,6 +20,7 @@ const SecondScreen = ({ route, navigation }) => {
   const { city, latitude, longitude } = route.params;
   const [weatherData, setWeatherData] = useState(null);
   const [cityName, setCityName] = useState("unknown");
+  const [currentTimes, setCurrentTimes] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,15 +32,12 @@ const SecondScreen = ({ route, navigation }) => {
           lat = city.coord.lat;
           lon = city.coord.lon;
         } else if (!city) {
-          // Koordinatlardan şehir adını al
           const cityResponse = await fetch(
             `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`
           );
           const cityData = await cityResponse.json();
-          // İlk dönen şehir adını al
           const cityName = cityData[0]?.name || "Unknown";
-          setCityName(cityName); // cityName'i güncelle
-          console.log("City Name:", cityName);
+          setCityName(cityName);
         }
 
         const response = await fetch(
@@ -48,7 +47,7 @@ const SecondScreen = ({ route, navigation }) => {
         setWeatherData(data);
       } catch (error) {
         console.error("Hava durumu verilerini alırken hata:", error);
-        setWeatherData(null); // Hata durumunda weatherData'yı null olarak ayarlayın
+        setWeatherData(null);
       }
     };
 
@@ -71,15 +70,13 @@ const SecondScreen = ({ route, navigation }) => {
       "yyyy-MM-dd HH:mm:ss"
     );
 
-    // Tarih ve saat bilgilerini alın
     year = dateTime.year;
     month = dateTime.month;
     day = dateTime.day;
     hour = dateTime.hour;
     dayOfWeek = dateTime.weekday;
-    console.log(hour);
+    // console.log(hour);
 
-    // Haftanın hangi gününe denk geldiğini belirten metin tablosunu oluşturun
     const daysOfWeekText = [
       "Sunday",
       "Monday",
@@ -105,8 +102,8 @@ const SecondScreen = ({ route, navigation }) => {
       "December",
     ];
 
-    const monthTexts = monthText[month - 1];
-    const dayOfWeekText = daysOfWeekText[dayOfWeek - 1];
+    monthTexts = monthText[month - 1];
+    dayOfWeekText = daysOfWeekText[dayOfWeek - 1];
 
     const localDateTime = DateTime.local();
 
@@ -136,10 +133,42 @@ const SecondScreen = ({ route, navigation }) => {
   }
 
   if (weatherData && weatherData.list && weatherData.list.length > 0) {
-    const dateTime = weatherData.list[1].dt_txt;
+    const dateTime = weatherData.list[0].dt_txt;
     const hour = dateTime.split(" ")[1].split(":").slice(0, 2).join(":");
-    console.log(hour);
+    // console.log(hour);
+    // console.log(weatherData.list[0].dt_txt);
   }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let lat = latitude;
+        let lon = longitude;
+
+        if (!lat && !lon && city && city.coord) {
+          lat = city.coord.lat;
+          lon = city.coord.lon;
+        } else if (!lat && !lon && !city) {
+          const cityResponse = await fetch(
+            `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`
+          );
+          const cityData = await cityResponse.json();
+          const cityName = cityData[0]?.name || "Unknown";
+          setCityName(cityName);
+          lat = cityData[0]?.lat || null;
+          lon = cityData[0]?.lon || null;
+        }
+
+        const currentTime = await fetchLocalTime(lat, lon);
+        setCurrentTimes(parseInt(currentTime.split(":")[0], 10));
+      } catch (error) {
+        console.error("Zaman bilgisini alırken hata:", error);
+        setCurrentTimes(null);
+      }
+    };
+
+    fetchData();
+  }, [city, latitude, longitude]);
 
   return (
     <>
@@ -172,7 +201,7 @@ const SecondScreen = ({ route, navigation }) => {
                 <View style={styles.topSection}>
                   {/* saat kısmı burası */}
                   <ImageBackground
-                    source={getBackgroundImage(hour.toString())}
+                    source={getBackgroundImage(currentTimes)}
                     style={styles.imageBackground}
                   >
                     {/* Üst Kısım 1 */}

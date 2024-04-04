@@ -16,16 +16,28 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.iWeather"
+      "bundleIdentifier": "com.anonymous.iWeather",
+      "runtimeVersion": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "runtimeVersion": {
+        "policy": "appVersion"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4d973e45-ca98-4bc8-8404-3819bdfd1fe7"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4d973e45-ca98-4bc8-8404-3819bdfd1fe7"
     }
   }
 }
