@@ -23,8 +23,8 @@ const FirstScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCity, setSelectedCity] = useState(null);
   const [location, setLocation] = useState(null);
-  // const lat = location.coords.latitude;
-  // const lon = location.coords.longitude;
+
+  // console.log(lat, lon);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -82,8 +82,27 @@ const FirstScreen = ({ navigation }) => {
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation);
     };
+    // const lat = location.coords.latitude;
+    // const lon = location.coords.longitude;
+    // console.log(lat, lon);
     getPermission();
   });
+
+  if (location && location.coords) {
+    const lat = location.coords.latitude;
+    const lon = location.coords.longitude;
+    // console.log(location["coords"].latitude, location["coords"].longitude);
+    // console.log(location.coords.latitude, location.coords.longitude);
+  }
+
+  const handleLocationButtonPress = async () => {
+    if (location && location.coords) {
+      const { latitude, longitude } = location.coords;
+      navigation.navigate("SecondScreen", { latitude, longitude });
+    } else {
+      console.error("Konum izni verilmedi");
+    }
+  };
 
   return (
     <ImageBackground
@@ -118,7 +137,10 @@ const FirstScreen = ({ navigation }) => {
                   }
                 }}
               />
-              <TouchableOpacity style={styles.locationWeather}>
+              <TouchableOpacity
+                style={styles.locationWeather}
+                onPress={handleLocationButtonPress}
+              >
                 <Ionicons name="location" size={32} color="white" />
               </TouchableOpacity>
             </View>

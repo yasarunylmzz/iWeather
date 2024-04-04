@@ -16,25 +16,44 @@ import { DateTime } from "luxon";
 API_KEY = "9f7b96750665ffb639e69a2a081678fc";
 
 const SecondScreen = ({ route, navigation }) => {
-  const { city } = route.params;
+  const { city, latitude, longitude } = route.params;
   const [weatherData, setWeatherData] = useState(null);
+  const [cityName, setCityName] = useState("unknown");
 
   useEffect(() => {
     const fetchData = async () => {
-      setWeatherData("loading");
       try {
+        let lat = latitude;
+        let lon = longitude;
+
+        if (city && city.coord) {
+          lat = city.coord.lat;
+          lon = city.coord.lon;
+        } else if (!city) {
+          // Koordinatlardan şehir adını al
+          const cityResponse = await fetch(
+            `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`
+          );
+          const cityData = await cityResponse.json();
+          // İlk dönen şehir adını al
+          const cityName = cityData[0]?.name || "Unknown";
+          setCityName(cityName); // cityName'i güncelle
+          console.log("City Name:", cityName);
+        }
+
         const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/forecast?lat=${city.coord.lat}&lon=${city.coord.lon}&appid=${API_KEY}`
+          `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`
         );
         const data = await response.json();
         setWeatherData(data);
       } catch (error) {
         console.error("Hava durumu verilerini alırken hata:", error);
+        setWeatherData(null); // Hata durumunda weatherData'yı null olarak ayarlayın
       }
     };
 
     fetchData();
-  }, [city]);
+  }, [city, latitude, longitude]);
 
   let year;
   let month;
@@ -44,9 +63,13 @@ const SecondScreen = ({ route, navigation }) => {
   let second;
   let dayOfWeekText;
   let monthTexts;
+  let dayNamesOfWeek = [];
 
   if (weatherData && weatherData.list && weatherData.list.length > 0) {
-    const dateTime = DateTime.fromSeconds(weatherData.list[0].dt);
+    const dateTime = DateTime.fromFormat(
+      weatherData.list[0].dt_txt,
+      "yyyy-MM-dd HH:mm:ss"
+    );
 
     // Tarih ve saat bilgilerini alın
     year = dateTime.year;
@@ -54,6 +77,7 @@ const SecondScreen = ({ route, navigation }) => {
     day = dateTime.day;
     hour = dateTime.hour;
     dayOfWeek = dateTime.weekday;
+    console.log(hour);
 
     // Haftanın hangi gününe denk geldiğini belirten metin tablosunu oluşturun
     const daysOfWeekText = [
@@ -61,7 +85,7 @@ const SecondScreen = ({ route, navigation }) => {
       "Monday",
       "Tuesday",
       "Wednesday",
-      "Saturday",
+      "Thursday",
       "Friday",
       "Saturday",
     ];
@@ -81,34 +105,40 @@ const SecondScreen = ({ route, navigation }) => {
       "December",
     ];
 
-    monthTexts = monthText[month - 1];
-    dayOfWeekText = daysOfWeekText[dayOfWeek - 1];
+    const monthTexts = monthText[month - 1];
+    const dayOfWeekText = daysOfWeekText[dayOfWeek - 1];
+
+    const localDateTime = DateTime.local();
+
+    let unixNextDay = [];
+    for (let i = 0; i < 5; i++) {
+      const nextDayDateTime = localDateTime.plus({ days: i });
+      const nextDayUnix = nextDayDateTime.toSeconds();
+      unixNextDay.push(nextDayUnix.toFixed(0));
+    }
+
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+
+    for (let i = 0; i < 5; i++) {
+      const nextDayDateTime = DateTime.fromSeconds(parseInt(unixNextDay[i]));
+      const dayOfWeekIndex = nextDayDateTime.weekday;
+      const dayName = dayNames[dayOfWeekIndex - 1];
+      dayNamesOfWeek.push(dayName);
+    }
   }
-  const localDateTime = DateTime.local();
 
-  let unixNextDay = [];
-  for (let i = 0; i < 5; i++) {
-    const nextDayDateTime = localDateTime.plus({ days: i });
-    const nextDayUnix = nextDayDateTime.toSeconds();
-    unixNextDay.push(nextDayUnix.toFixed(0));
-  }
-
-  const dayNames = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-
-  let dayNamesOfWeek = [];
-  for (let i = 0; i < 5; i++) {
-    const nextDayDateTime = DateTime.fromSeconds(parseInt(unixNextDay[i]));
-    const dayOfWeekIndex = nextDayDateTime.weekday;
-    const dayName = dayNames[dayOfWeekIndex - 1];
-    dayNamesOfWeek.push(dayName);
+  if (weatherData && weatherData.list && weatherData.list.length > 0) {
+    const dateTime = weatherData.list[1].dt_txt;
+    const hour = dateTime.split(" ")[1].split(":").slice(0, 2).join(":");
+    console.log(hour);
   }
 
   return (
@@ -142,13 +172,15 @@ const SecondScreen = ({ route, navigation }) => {
                 <View style={styles.topSection}>
                   {/* saat kısmı burası */}
                   <ImageBackground
-                    source={getBackgroundImage(hour + ":" + minute)}
+                    source={getBackgroundImage(hour.toString())}
                     style={styles.imageBackground}
                   >
                     {/* Üst Kısım 1 */}
                     <View style={styles.topComp}>
                       <Text style={styles.stateText}>
-                        {city.name}, {city.country}
+                        {city && city.name
+                          ? `${city.name}, ${city.country}`
+                          : cityName}
                       </Text>
                       <Text style={styles.dateText}>
                         {dayOfWeekText}, {monthTexts} {month}, {year}
